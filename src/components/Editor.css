@@ -1,4 +1,4 @@
-.home {
+.Editor {
     width: 100%;
     height: 500px;
     border: 1px solid black;
@@ -7,18 +7,20 @@
     flex-direction: column;
     gap: 15px;
 }
-.home h1 {
-    text-align: center;
-}
-.list {
+
+.board-form {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    justify-content: space-around;
     height: 100%;
 }
-.board {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    cursor: pointer;
+
+.input-title {
+    padding: 10px;
+    height: 40px;
+}
+
+.input-content {
+    padding: 10px;
+    height: 300px;
 }
