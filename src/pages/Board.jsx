@@ -11,6 +11,10 @@ const Board = () => {
         navigate(-1);
     }
 
+    const goUpdate = () => {
+        navigate(`/edit/${boardId}`);
+    }
+
     const {data, isLoading, error} = useQuery({
         queryKey: ['board-detail'],
         queryFn: async () => {
@@ -37,6 +41,7 @@ const Board = () => {
             ))}
         </ul>
         <button onClick={goBack}>뒤로 가기</button>
+        <button onClick={goUpdate}>수정 하기</button>
     </div>
 }
 

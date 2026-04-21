@@ -3,6 +3,7 @@ import Home from "./pages/Home.jsx";
 import './App.css';
 import Board from "./pages/Board.jsx";
 import Write from "./pages/Write.jsx"
+import Update from "./pages/Update.jsx";
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/write" element={<Write />} />
         <Route path="/board/:boardId" element={<Board />} />
+        <Route path="/edit/:boardId" element={<Update />} />
     </Routes>
   )
 }
