@@ -2,22 +2,20 @@ import './Board.css'
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import axios from "axios";
 import {useNavigate, useParams} from "react-router-dom";
+import {useState} from "react";
 
 const Board = () => {
+    const [reply, setReply] = useState("");
     const  {boardId} = useParams();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
 
-    const deleteBoard = async () => {
-        const response = await axios.delete(`http://localhost:8080/api/boards/${boardId}`);
-        return response.data;
-    }
-
-    const mutation = useMutation({
-        mutationFn: deleteBoard,
+    const {mutate: deleteBoard, isPending: isPendingDelete} = useMutation({
+        mutationFn: async ()=> {
+            await axios.delete(`http://localhost:8080/api/boards/${boardId}`)
+        },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['boards'] });
-            queryClient.invalidateQueries({ queryKey: ['board-detail', boardId] });
             alert("성공!")
             navigate('/');
         },
@@ -26,12 +24,28 @@ const Board = () => {
         }
     });
 
-    const handleDelete = () => {
-        mutation.mutate()
+    const {mutate: createReply, isPending: isPendingReply} = useMutation({
+        mutationFn: async (newReply)=> {
+            console.log(newReply);
+            await axios.post(`http://localhost:8080/api/replies`, newReply)
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['board-detail', boardId] });
+            alert("성공!");
+            setReply("");
+        },
+        onError: (error) => {
+            console.error(error);
+        }
+    });
+
+    const handleCreateReply = (e) => {
+        e.preventDefault();
+        createReply({ content: reply, memberId: 1, boardId: boardId });
     }
 
     const goBack = () => {
-        navigate(-1);
+        navigate(`/`);
     }
 
     const goUpdate = () => {
@@ -39,7 +53,7 @@ const Board = () => {
     }
 
     const {data, isLoading, error} = useQuery({
-        queryKey: ['board-detail'],
+        queryKey: ['board-detail', boardId],
         queryFn: async () => {
             const response = await axios.get(`http://localhost:8080/api/boards/${boardId}`);
             return response.data;
@@ -63,9 +77,15 @@ const Board = () => {
                 </li>
             ))}
         </ul>
+        <form className="reply-input" onSubmit={handleCreateReply}>
+            <input type="text" name="reply"
+                   value={reply}
+                   onChange={(e)=>setReply(e.target.value)} />
+            <button type="submit" disabled={isPendingReply}>{isPendingReply? "작성 중.." : "작성"}</button>
+        </form>
         <button onClick={goBack}>뒤로 가기</button>
         <button onClick={goUpdate}>수정 하기</button>
-        <button onClick={handleDelete}>삭제 하기</button>
+        <button onClick={deleteBoard} disabled={isPendingDelete}>{isPendingDelete ? "삭제 중..." : "삭제 하기"}</button>
     </div>
 }
 

@@ -8,15 +8,6 @@ const Update = () => {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
 
-    const updateBoard = async (newPost) => {
-        const response = await axios.patch(`http://localhost:8080/api/boards/${boardId}`, newPost);
-        return response.data;
-    }
-
-    const handleUpdate = (formData) => {
-        mutation.mutate({...formData, memberId: 1});
-    }
-
     const {data, isLoading, error} = useQuery({
         queryKey: ['board-detail', boardId],
         queryFn: async () => {
@@ -25,8 +16,10 @@ const Update = () => {
         }
     })
 
-    const mutation = useMutation({
-        mutationFn: updateBoard,
+    const {mutate: updateBoard, isPending} = useMutation({
+        mutationFn: async (newPost) => {
+            await axios.patch(`http://localhost:8080/api/boards/${boardId}`, newPost);
+        },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['boards'] });
             queryClient.invalidateQueries({ queryKey: ['board-detail', boardId] });
@@ -38,6 +31,10 @@ const Update = () => {
         }
     });
 
+    const handleUpdate = (formData) => {
+        updateBoard({...formData, memberId: 1});
+    }
+
     if (isLoading) return <div>로딩 중...</div>;
     if (error) return <div>에러 발생!</div>;
 
@@ -45,7 +42,7 @@ const Update = () => {
         <Editor
             onSubmit={handleUpdate}
             initialData={data}
-            isPending={mutation.isPending}
+            isPending={isPending}
         />
     )
 }

@@ -3,17 +3,14 @@ import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
 
-const createBoard = async (newPost) => {
-    const response = await axios.post("http://localhost:8080/api/boards", newPost);
-    return response.data;
-}
-
 const Write = () => {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
 
-    const mutation = useMutation({
-        mutationFn: createBoard,
+    const {mutate: createBoard, isPending} = useMutation({
+        mutationFn: async (newPost) => {
+            await axios.post("http://localhost:8080/api/boards", newPost);
+        },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['boards'] });
             alert("성공!")
@@ -25,13 +22,13 @@ const Write = () => {
     });
 
     const handleCreate = (formData) => {
-        mutation.mutate({...formData, memberId: 1});
+        createBoard({...formData, memberId: 1});
     }
 
     return (
         <Editor
             onSubmit={handleCreate}
-            isPending={mutation.isPending}
+            isPending={isPending}
         />
     )
 }
